@@ -442,7 +442,7 @@ Partial key matching to add the full key and luminosity in gene matching sas r, 
         host="localhost",
         port="5432",
         user="postgres",
-        password="Sas2@rlx",
+        password="12345678",
         database="devel",
         options="-c search_path=demographics"
     )
