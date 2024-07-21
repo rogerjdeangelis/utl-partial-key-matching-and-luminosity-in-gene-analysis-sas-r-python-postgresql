@@ -1,5 +1,3 @@
-# utl-partial-key-matching-and-luminosity-in-gene-analysis-sas-r-python-postgresql
-Partial key matching to add the full key and luminosity in gene matching sas r, python and postgresql
     %let pgm=utl-partial-key-matching-and-luminosity-in-gene-analysis-sas-r-python-postgresql;
 
     Partial key matching to add the full key and luminosity in gene matching sas r, python and postgresql
@@ -9,7 +7,8 @@ Partial key matching to add the full key and luminosity in gene matching sas r, 
                2 r sqldf
                3 python sqldf
                4 python PostgreSQL (relational database)
-               5 related repos
+               5 r postgresql
+               6 related repos
 
     github
     https://tinyurl.com/yxcnsfsx
@@ -507,14 +506,105 @@ Partial key matching to add the full key and luminosity in gene matching sas r, 
     /*                                                                                                                        */
     /**************************************************************************************************************************/
 
+    /*___                           _                            _
+    | ___|   _ __   _ __   ___  ___| |_ __ _ _ __ ___  ___  __ _| |
+    |___ \  | `__| | `_ \ / _ \/ __| __/ _` | `__/ _ \/ __|/ _` | |
+     ___) | | |    | |_) | (_) \__ \ || (_| | | |  __/\__ \ (_| | |
+    |____/  |_|    | .__/ \___/|___/\__\__, |_|  \___||___/\__, |_|
+                   |_|                 |___/                  |_|
+    */
 
-    /*___             _       _           _
-    | ___|   _ __ ___| | __ _| |_ ___  __| |  _ __ ___ _ __   ___  ___
-    |___ \  | `__/ _ \ |/ _` | __/ _ \/ _` | | `__/ _ \ `_ \ / _ \/ __|
-     ___) | | | |  __/ | (_| | ||  __/ (_| | | | |  __/ |_) | (_) \__ \
-    |____/  |_|  \___|_|\__,_|\__\___|\__,_| |_|  \___| .__/ \___/|___/
+    proc datasets lib=sd1 nodetails nolist;
+     delete want;
+    run;quit;
+
+    %utl_rbeginx;
+    parmcards4;
+    library(RPostgres)
+    library(DBI)
+    library(haven)
+    source("c:/oto/fn_tosas9x.R");
+    a<-read_sas("d:/sd1/a.sas7bdat")
+    b<-read_sas("d:/sd1/b.sas7bdat")
+    con <- dbConnect(RPostgres::Postgres(),
+                dbname = "devel",  # Use the default 'postgres' database
+                host = "localhost",   # Replace with your PostgreSQL server address if not local
+                port = 5432,          # Default PostgreSQL port
+                user = "postgres",
+                password = "12345678")
+    dbExecute(con, "SET search_path TO demographics")
+    dbListObjects(con, Id(schema = 'demographics'))
+    dbWriteTable(conn=con,name="a",value=a,row.names = FALSE, overwrite = TRUE)
+    dbWriteTable(conn=con,name="b",value=b,row.names = FALSE, overwrite = TRUE)
+    query <- "
+      select
+         l.key
+        ,r.lumins
+     from
+        (select
+            key
+           ,substr(key,1,5) as part
+         from
+            a
+         union
+            all
+         select
+            key
+           ,substr(key,7,5) as part
+         from
+            a ) as l left join b as r
+     on
+       trim(l.part) = trim(substr(r.key,1,5))
+     where                                     \
+       lumins is not null"
+    df <- dbGetQuery(con, query)
+    dbListObjects(con, Id(schema = 'demographics'))
+    dbDisconnect(con)
+    df;
+    fn_tosas9x(
+          inp    = df
+         ,outlib ="d:/sd1/"
+         ,outdsn ="want"
+         );
+    ');
+    ;;;;
+    %utl_rendx;
+
+    proc print data=sd1.want;
+    run;quit;
+
+    /**************************************************************************************************************************/
+    /*                                                                                                                        */
+    /* R                                                                                                                      */
+    /* ======                                                                                                                 */
+    /*                                                                                                                        */
+    /*             key  lumins                                                                                                */
+    /*  1  gene1-ID001    22.0                                                                                                */
+    /*  2  gene3-ID003    11.0                                                                                                */
+    /*  3  gene4-ID004    15.0                                                                                                */
+    /*  4  gene2-ID002    13.0                                                                                                */
+    /*                                                                                                                        */
+    /* SAS                                                                                                                    */
+    /* ===                                                                                                                    */
+    /*                                                                                                                        */
+    /*  Obs        key        lumins                                                                                          */
+    /*                                                                                                                        */
+    /*   1     gene1-ID001      22                                                                                            */
+    /*   2     gene3-ID003      11                                                                                            */
+    /*   3     gene4-ID004      15                                                                                            */
+    /*   4     gene2-ID002      13                                                                                            */
+    /*                                                                                                                        */
+    /**************************************************************************************************************************/
+
+
+    /*__              _       _           _
+     / /_    _ __ ___| | __ _| |_ ___  __| |  _ __ ___ _ __   ___  ___
+    | `_ \  | `__/ _ \ |/ _` | __/ _ \/ _` | | `__/ _ \ `_ \ / _ \/ __|
+    | (_) | | | |  __/ | (_| | ||  __/ (_| | | | |  __/ |_) | (_) \__ \
+     \___/  |_|  \___|_|\__,_|\__\___|\__,_| |_|  \___| .__/ \___/|___/
                                                       |_|
     */
+
 
     https://github.com/rogerjdeangelis/mySQL-uml-modeling-to-create-entity-diagrams-for-sas-datasets
     https://github.com/rogerjdeangelis/utl-PASSTHRU-to-mysql-and-select-rows-based-on-a-SAS-dataset-without-loading-the-SAS-daatset-into-my
@@ -553,4 +643,6 @@ Partial key matching to add the full key and luminosity in gene matching sas r, 
      \___|_| |_|\__,_|
 
     */
+
+
 
