@@ -440,7 +440,7 @@ conn = psycopg2.connect(
     host="localhost",
     port="5432",
     user="postgres",
-    password="Sas2@rlx",
+    password="12345678",
     database="devel",
     options="-c search_path=demographics"
 )
