@@ -441,7 +441,7 @@ conn = psycopg2.connect(
     host="localhost",
     port="5432",
     user="postgres",
-    password="Sas2@rlx",
+    password="12345678",
     database="devel",
     options="-c search_path=demographics"
 )
@@ -643,6 +643,8 @@ https://github.com/rogerjdeangelis/utl_with_a_press_of_a_function_key_convert_th
  \___|_| |_|\__,_|
 
 */
+
+
 
 
 
